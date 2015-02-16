@@ -55,7 +55,6 @@ eurecaClient.exports.setId = function(id)
     eurecaClient.exports.updateState = function(id, state)
   {
     if (farmersList[id])  {
-      console.log('ok')
       farmersList[id].cursor = state;
       farmersList[id].farmer.x = state.x;
       farmersList[id].farmer.y = state.y;
@@ -67,7 +66,7 @@ eurecaClient.exports.setId = function(id)
 
 
 Farmer = function (index, game, player) {
-  console.log("Farmer")
+
 
     this.cursor = {
     left:false,
@@ -111,6 +110,48 @@ Farmer = function (index, game, player) {
 
 };
 
+ Farmer.prototype.kill = function() {
+    this.alive = false;
+    this.farmer.kill();
+  }
+
+ Farmer.prototype.update = function() {
+
+  
+  var inputChanged = (
+    this.cursor.left != this.input.left ||
+    this.cursor.right != this.input.right ||
+    this.cursor.up != this.input.up ||
+    this.cursor.down != this.input.down
+  );
+  
+  
+  if (inputChanged)
+  {
+    //Handle input change here
+    //send new values to the server   
+    if (this.farmer.id == myId)
+    {
+      
+      // send latest valid state to the server
+      this.input.x = this.farmer.x;
+      this.input.y = this.farmer.y;
+
+      eurecaServer.handleKeys(this.input);
+    }
+  }
+
+
+
+  if (this.cursor.left) { this.farmer.body.velocity.x -= 8; }
+  else if (this.cursor.right) { this.farmer.body.velocity.x += 8; } 
+  else if (this.cursor.up) { this.farmer.body.velocity.y -= 8; }
+  else if (this.cursor.down) { this.farmer.body.velocity.y += 8; }
+
+};
+
+
+
 // Initializing game =======================================================================
 var game = new Phaser.Game(1000, 500, Phaser.AUTO, 'game-mainpage', { preload: preload, create: eurecaClientSetup, update: update, render: render });
 
@@ -125,12 +166,10 @@ function preload() {
 
 
 function create() {
-  console.log("create")
-
   
 
-
 game.physics.startSystem(Phaser.Physics.ARCADE);
+game.stage.disableVisibilityChange  = true;
 
   group = game.add.group();
   group.enableBody = true;  
@@ -139,8 +178,6 @@ game.physics.startSystem(Phaser.Physics.ARCADE);
 
   createBall();
   createPlayer();
-
-   cursors = game.input.keyboard.createCursorKeys();
 
   //Explosion
 
@@ -158,6 +195,9 @@ game.physics.startSystem(Phaser.Physics.ARCADE);
   timer.start()
 
 
+  cursors = game.input.keyboard.createCursorKeys();
+
+
  
 
 }
@@ -169,55 +209,36 @@ function update() {
   //do not update if client not ready
   if (!ready) return;
 
-  console.log(player.input)
   // ball.rotation += ball.body.velocity.x/1000;
   player.input.left = cursors.left.isDown;
   player.input.right = cursors.right.isDown;
   player.input.up = cursors.up.isDown;
   player.input.down = cursors.down.isDown;
 
- for (var i in farmersList)    {
-     // if (farmersList[i].alive){
-     //    var targetFarmer = farmersList[i].farmer;
-        farmersList[i].update();
-    //  }
-    }
-  }
-
-Farmer.prototype.update = function() {
-  console.log('trying to update')
-  
-  var inputChanged = (
-    this.cursor.left != this.input.left ||
-    this.cursor.right != this.input.right ||
-    this.cursor.up != this.input.up ||
-    this.cursor.down != this.input.down
-  );
-  
-  
-  if (inputChanged)
-  {
-    //Handle input change here
-    //send new values to the server   
-    if (this.farmer.id == myId)
+ 
+    for (var i in farmersList)
     {
-      console.log(player)
-      // send latest valid state to the server
-      this.input.x = this.farmer.x;
-      this.input.y = this.farmer.y;
+    if (!farmersList[i]) continue;
+    var curFarmer = farmersList[i].farmer;
+    for (var j in farmersList)
+    {
+      if (!farmersList[j]) continue;
+      if (j!=i) 
+      {
+      
+        var targetFarmer = farmersList[j].farmer;
+        
+        game.physics.arcade.overlap(targetFarmer, null, this);
+      
+      }
+      if (farmersList[j].alive)
+      {
+        farmersList[j].update();
+      }     
     }
-  }
-  
-      
-      
-      eurecaServer.handleKeys(this.input);
+    }
+}
 
-  if (cursors.left.isDown) { this.farmer.velocity.x -= 8; }
-  else if (cursors.right.isDown) { this.farmer.velocity.x += 8; } 
-  if (cursors.up.isDown) { this.farmer.velocity.y -= 8; }
-  else if (cursors.down.isDown) { this.farmer.velocity.y += 8; }
-
-};
 
 
 
@@ -230,19 +251,18 @@ function render() {
 // Game methods ============================================================================
 
 function createPlayer() {
-  (console.log('backhere'))
+
   farmersList = {};
   
   player = new Farmer(myId, game, farmer)
   farmersList[myId] = player;
   farmer = player.farmer
-
+  farmer.x=0;
+  farmer.y=0;
 
   timer = game.time.create(true);
   timer.start()
 
-
-  console.log(player)
 }
 
 function audio() {
@@ -268,7 +288,7 @@ function createBall() {
 function destroySprite() {
 
   character.kill();
-
+  
   var score = timer;
   playerScore = ((score._now - score._started)/1000);
   getScore(playerScore);
@@ -280,10 +300,8 @@ function destroySprite() {
 
 }
 
-
 function getScore(playerScore) {
 
-  console.log(playerScore)
   deathLol(playerScore)
 
 }

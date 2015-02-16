@@ -2,11 +2,11 @@ html {
   height: 100%;
 }
 
-body {
+/*body {
   background-image: url(/image/grass.jpg);
   min-height: 100%;
   text-align: center;
-}
+}*/
 
 #jumbotron #form-box {
     position: absolute;
