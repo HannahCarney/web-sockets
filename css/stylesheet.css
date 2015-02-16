@@ -1,0 +1,50 @@
+html {
+  height: 100%;
+}
+
+body {
+  background-image: url(/image/grass.jpg);
+  min-height: 100%;
+  text-align: center;
+}
+
+#jumbotron #form-box {
+    position: absolute;
+}
+
+#logo {
+  width: auto;
+}
+
+#mud {
+  position: absolute;
+  z-index: -5;
+}
+
+#mud2 {
+   position: absolute;
+   display: none;  
+   z-index: -5;
+}
+
+#game-mainpage {
+  margin: 0 0 auto;
+  display: inline-block;
+}
+
+
+/*===== GAME PAGE =======*/
+
+#high-scores {
+  float: left;
+  display: inline;
+/*  height: 10em;
+  width: 22em;
+  margin-left: 1.3em;*/
+  background-image: url(/image/box.png) 0 0 no-repeat;
+}
+
+div #form-box {
+  background-image: url(/image/box2.png) 0 0 no-repeat;
+    
+}
