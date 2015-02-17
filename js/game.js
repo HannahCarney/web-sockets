@@ -110,6 +110,22 @@ Farmer = function (index, game, player) {
 
 };
 
+Ball = function(game) {
+  this.game = game;
+  this.balls = game.add.group();
+  this.balls.enableBody = true;  
+  this.balls.physicsBodyType = Phaser.Physics.ARCADE;
+  game.time.events.loop(5000, this.balls, this);
+  this.balls = group.create(game.world.randomX, game.world.randomY, 'flyer', 1);
+  
+  game.physics.enable(this.balls, Phaser.Physics.ARCADE);
+
+  this.balls.scale.setTo(0.01, 0.01);
+  this.balls.body.collideWorldBounds = true;
+  this.balls.body.bounce.set(1.01);
+  this.balls.body.velocity.setTo(200,200);
+}
+
  Farmer.prototype.kill = function() {
     this.alive = false;
     this.farmer.kill();
